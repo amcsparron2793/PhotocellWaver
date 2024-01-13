@@ -1,0 +1,8 @@
+adafruit-ampy==1.0.7
+click==8.1.7
+colorama==0.4.6
+docopt==0.6.2
+micropython-servo==1.0.1
+picozero==0.4.2
+pyserial==3.5
+python-dotenv==1.0.0
