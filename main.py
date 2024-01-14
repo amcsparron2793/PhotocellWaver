@@ -51,14 +51,14 @@ def TestButton():
         print(test_b.is_active)
 
 
-def StartStop(button_pin: int = 13):
+def StartStop(button_pin: int = 13, reverse=False):
     start_stop_button = Button(button_pin)
 
     if start_stop_button.is_active:
         print("start/stop activated.")
         try:
             if speaker:
-                speaker.play(440, 0.5)
+                OnUpOffDown(reverse)
         except UnboundLocalError as e:
             print(e)
             pass
@@ -87,8 +87,8 @@ def ReadPhotoCell(**kwargs):
     while True:
         has_waved = False
         if wave_button.is_active:
-            # this can only work when the servo and led pins are the defaults
-            wave_button.when_activated = Wave
+            InfoBeep()
+            Wave(led=onboard_led_pin)
             has_waved = True
 
         photo_cell_reading = ldr.read_u16()
@@ -102,13 +102,14 @@ def ReadPhotoCell(**kwargs):
 
         sleep(1)
 
-        stop = StartStop()
+        stop = StartStop(reverse=True)
         if stop:
             break
     WaitForStart()
 
 
 def WaitForStart():
+    print("Waiting for Start.")
     while True:
         LED_Blink()
         go = StartStop()
@@ -117,7 +118,22 @@ def WaitForStart():
     ReadPhotoCell()
 
 
+def OnUpOffDown(reverse=False):
+    """ play a note starting at 1000Hz, go to 4000 with steps of 100 or reverse that."""
+    if not reverse:
+        for i in range(1000, 4000, 100):
+            speaker.play(i, 0.05)
+    if reverse:
+        for i in reversed(range(1000, 4000, 100)):
+            speaker.play(i, 0.05)
+
+
+def InfoBeep():
+    speaker.play(880, 0.1)
+    sleep(0.05)
+    speaker.play(880, 0.05)
+
+
 if __name__ == '__main__':
     speaker = Speaker(15)
-    print("Waiting for Start.")
     WaitForStart()
