@@ -4,8 +4,12 @@ Reads a photocell and turns a servo to keep the lights on.
 """
 
 from machine import ADC, Pin
-from picozero import Button, Speaker
-from servo import Servo
+try:
+    from OutsideModules.picozero import Button, Speaker
+    from OutsideModules.servo import Servo
+except ImportError:
+    from picozero import Button, Speaker
+    from servo import Servo
 from time import sleep, sleep_ms
 
 
