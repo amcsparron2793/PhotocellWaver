@@ -4,7 +4,7 @@ Reads a photocell and turns a servo to keep the lights on.
 """
 
 from machine import ADC, Pin
-from picozero import Button
+from picozero import Button, Speaker
 from servo import Servo
 from time import sleep, sleep_ms
 
@@ -33,10 +33,10 @@ def Wave(servo_pin: int = 0, led: Pin = Pin(25, Pin.OUT), **kwargs):
         servo.write(position)  # Set the Servo to the current position
         sleep_ms(delay_ms)  # wait delay_ms before moving to the next number
 
-    onboardLED_Blink(led)
+    LED_Blink(led)
 
 
-def onboardLED_Blink(led: Pin = Pin(25, Pin.OUT), sleep_length: float = 0.5):
+def LED_Blink(led: Pin = Pin(25, Pin.OUT), sleep_length: float = 0.5):
     led.on()
     # print("LED on")
     sleep(sleep_length)
@@ -56,6 +56,12 @@ def StartStop(button_pin: int = 13):
 
     if start_stop_button.is_active:
         print("start/stop activated.")
+        try:
+            if speaker:
+                speaker.play(440, 0.5)
+        except UnboundLocalError as e:
+            print(e)
+            pass
         return start_stop_button
     else:
         return False
@@ -104,7 +110,7 @@ def ReadPhotoCell(**kwargs):
 
 def WaitForStart():
     while True:
-        onboardLED_Blink()
+        LED_Blink()
         go = StartStop()
         if go:
             break
@@ -112,5 +118,6 @@ def WaitForStart():
 
 
 if __name__ == '__main__':
+    speaker = Speaker(15)
     print("Waiting for Start.")
     WaitForStart()
