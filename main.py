@@ -2,8 +2,10 @@
 PhotocellWaver
 Reads a photocell and turns a servo to keep the lights on.
 """
-
-from typing import List
+try:
+    from typing import List
+except ImportError:
+    pass
 # noinspection PyPackageRequirements
 from machine import ADC, Pin
 
