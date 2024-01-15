@@ -3,14 +3,18 @@ PhotocellWaver
 Reads a photocell and turns a servo to keep the lights on.
 """
 
+from typing import List
+# noinspection PyPackageRequirements
 from machine import ADC, Pin
+
 try:
-    from OutsideModules.picozero import Button, Speaker
+    from OutsideModules.picozero import Button, Speaker, pico_temp_sensor
     from OutsideModules.servo import Servo
 except ImportError:
     from picozero import Button, Speaker
     from servo import Servo
 from time import sleep, sleep_ms
+from utime import sleep as u_sleep
 
 
 def Wave(servo_pin: int = 0, led: Pin = Pin(25, Pin.OUT), **kwargs):
@@ -138,6 +142,41 @@ def InfoBeep():
     speaker.play(880, 0.05)
 
 
+def StepperMotor(pin_list: List[Pin] = None):
+    def _validate_pins() -> List[Pin]:
+        if pin_list:
+            if isinstance(pin_list, List):
+                pass
+            else:
+                raise TypeError("pin_list must be a list.")
+            if [x for x in pin_list if isinstance(x, Pin)]:
+                pins = pin_list
+            else:
+                raise TypeError("pin_list must be a list CONTAINING Pin's.")
+        else:
+            pins = [Pin(2, Pin.OUT),
+                    Pin(3, Pin.OUT),
+                    Pin(4, Pin.OUT),
+                    Pin(5, Pin.OUT)]
+        return pins
+
+    pins = _validate_pins()
+
+    step_seq: List[List[int]] = [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ]
+
+    while True:
+        for step in step_seq:
+            for i in range(len(pins)):
+                pins[i].value(step[i])
+                u_sleep(0.001)
+
+
 if __name__ == '__main__':
     speaker = Speaker(15)
     WaitForStart()
+    # StepperMotor()
