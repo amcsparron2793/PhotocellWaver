@@ -5,18 +5,24 @@ Reads a photocell and turns a servo to keep the lights on.
 try:
     from typing import List
 except ImportError:
+    List = None
     pass
 # noinspection PyPackageRequirements
 from machine import ADC, Pin
 
 try:
-    from OutsideModules.picozero import Button, Speaker, pico_temp_sensor
+    from OutsideModules.picozero import Button, Speaker, RGBLED
     from OutsideModules.servo import Servo
 except ImportError:
-    from picozero import Button, Speaker
+    from picozero import Button, Speaker, RGBLED
     from servo import Servo
+
 from time import sleep, sleep_ms
 from utime import sleep as u_sleep
+
+# RGB color tuples
+blue: tuple = (0, 0, 255)
+green: tuple = (0, 255, 0)
 
 
 def Wave(servo_pin: int = 0, led: Pin = Pin(25, Pin.OUT), **kwargs):
@@ -66,6 +72,8 @@ def StartStop(button_pin: int = 13, reverse=False):
 
     if start_stop_button.is_active:
         print("start/stop activated.")
+        if rgb:
+            rgb.color = green
         try:
             if speaker:
                 OnUpOffDown(reverse)
@@ -81,18 +89,15 @@ def ReadPhotoCell(**kwargs):
     onboard_led_pin = Pin(25, Pin.OUT)
     photocell_pin = 27
     dark_threshold = 1000
-    manual_button_pin = 18
 
     if kwargs:
         if 'photocell_pin' in kwargs and type(kwargs['photocell_pin']) == int:
             photocell_pin = kwargs['photocell_pin']
         if 'dark_threshold' in kwargs and type(kwargs['dark_threshold']) == int:
             dark_threshold = kwargs['dark_threshold']
-        if 'manual_button_pin' in kwargs and type(kwargs['manual_button_pin']) == int:
-            manual_button_pin = kwargs['manual_button_pin']
 
     ldr = ADC(photocell_pin)
-    wave_button = Button(manual_button_pin)
+    wave_button = manual_button
 
     while True:
         has_waved = False
@@ -121,7 +126,10 @@ def ReadPhotoCell(**kwargs):
 def WaitForStart():
     print("Waiting for Start.")
     while True:
-        LED_Blink()
+        if rgb:
+            rgb.color = blue
+        else:
+            LED_Blink()
         go = StartStop()
         if go:
             break
@@ -178,7 +186,24 @@ def StepperMotor(pin_list: List[Pin] = None):
                 u_sleep(0.001)
 
 
+def RGB_Setup(rgb_pins: List[int] = None):
+    if rgb_pins is None:
+        rgb_pins = [2, 3, 4]
+    if len(rgb_pins) != 3:
+        raise AttributeError("rgb_pins must have three entries.")
+    else:
+        pass
+    red_pin = rgb_pins[0]
+    green_pin = rgb_pins[1]
+    blue_pin = rgb_pins[2]
+    rgb_inst = RGBLED(red_pin, green_pin, blue_pin)
+    return rgb_inst
+
+
 if __name__ == '__main__':
+    manual_button = Button(18)
     speaker = Speaker(15)
+    rgb = RGB_Setup()
+
     WaitForStart()
     # StepperMotor()
