@@ -188,7 +188,7 @@ def StepperMotor(pin_list: List[Pin] = None):
 
 def RGB_Setup(rgb_pins: List[int] = None):
     if rgb_pins is None:
-        rgb_pins = [2, 3, 4]
+        rgb_pins = [19, 20, 21]
     if len(rgb_pins) != 3:
         raise AttributeError("rgb_pins must have three entries.")
     else:
