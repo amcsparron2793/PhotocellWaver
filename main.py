@@ -11,10 +11,10 @@ except ImportError:
 from machine import ADC, Pin
 
 try:
-    from OutsideModules.picozero import Button, Speaker, RGBLED
+    from OutsideModules.picozero import Button, Speaker, RGBLED, Switch
     from OutsideModules.servo import Servo
 except ImportError:
-    from picozero import Button, Speaker, RGBLED
+    from picozero import Button, Speaker, RGBLED, Switch
     from servo import Servo
 
 from time import sleep, sleep_ms
@@ -67,10 +67,11 @@ def TestButton():
         print(test_b.is_active)
 
 
-def StartStop(button_pin: int = 13, reverse=False):
+def StartStop(button_pin: int = 13, switch_pin: int = 16, reverse=False, switch_mode: bool = False):
     start_stop_button = Button(button_pin)
-
-    if start_stop_button.is_active:
+    start_stop_switch = Switch(16)
+    # FIXME: or part just runs the start in a loop
+    if start_stop_button.is_active or start_stop_switch.is_active:
         print("start/stop activated.")
         if rgb:
             rgb.color = green
